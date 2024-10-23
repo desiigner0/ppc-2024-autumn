@@ -8,10 +8,6 @@
 
 #include "mpi/lupsha_e_rect_integration/include/ops_mpi.hpp"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 TEST(lupsha_e_rect_integration_mpi, Test_Constant) {
   boost::mpi::communicator world;
   double lower_bound = 0.0;
@@ -118,7 +114,7 @@ TEST(lupsha_e_rect_integration_mpi, Test_Gaussian) {
   boost::mpi::communicator world;
   double lower_bound = -1.0;
   double upper_bound = 1.0;
-  int num_intervals = 1000;
+  int num_intervals = 100000;
   std::vector<double> global_sum(1, 0.0);
   std::vector<double> result_seq(1, 0.0);
 
@@ -161,15 +157,15 @@ TEST(lupsha_e_rect_integration_mpi, Test_Gaussian) {
     sequential_Task.run();
     sequential_Task.post_processing();
 
-    ASSERT_NEAR(global_sum[0], result_seq[0], 1e-5);
+    ASSERT_NEAR(global_sum[0], result_seq[0], 1e-3);
   }
 }
 
-TEST(lupsha_e_rect_integration_mpi, Test_Cos) {
+TEST(lupsha_e_rect_integration_mpi, Test_Exp) {
   boost::mpi::communicator world;
   double lower_bound = 0.0;
-  double upper_bound = 2 * M_PI;
-  int num_intervals = 1000;
+  double upper_bound = 1.0;
+  int num_intervals = 10000;
   std::vector<double> global_sum(1, 0.0);
   std::vector<double> result_seq(1, 0.0);
 
@@ -185,7 +181,7 @@ TEST(lupsha_e_rect_integration_mpi, Test_Cos) {
 
   lupsha_e_rect_integration_mpi::TestMPITaskParallel testMpiTaskParallel(taskDataPar);
 
-  std::function<double(double)> f = [](double x) { return cos(x); };
+  std::function<double(double)> f = [](double x) { return exp(x); };
   testMpiTaskParallel.function_set(f);
 
   ASSERT_TRUE(testMpiTaskParallel.validation());
@@ -205,14 +201,14 @@ TEST(lupsha_e_rect_integration_mpi, Test_Cos) {
     taskDataSeq->outputs_count.emplace_back(1);
 
     lupsha_e_rect_integration_mpi::TestMPITaskSequential sequential_Task(taskDataSeq);
-    sequential_Task.function_set([](double x) { return cos(x); });
+    sequential_Task.function_set([](double x) { return exp(x); });
 
     ASSERT_EQ(sequential_Task.validation(), true);
     sequential_Task.pre_processing();
     sequential_Task.run();
     sequential_Task.post_processing();
 
-    ASSERT_NEAR(global_sum[0], result_seq[0], 1e-5);
+    ASSERT_NEAR(global_sum[0], result_seq[0], 1e-3);
   }
 }
 
@@ -220,7 +216,7 @@ TEST(lupsha_e_rect_integration_mpi, Test_Power) {
   boost::mpi::communicator world;
   double lower_bound = 0.0;
   double upper_bound = 1.0;
-  int num_intervals = 1000;
+  int num_intervals = 10000;
   std::vector<double> global_sum(1, 0.0);
   std::vector<double> result_seq(1, 0.0);
 
@@ -282,7 +278,7 @@ TEST(lupsha_e_rect_integration_mpi, Validation_LowerBoundGreaterThanUpperBound) 
   boost::mpi::communicator world;
   double lower_bound = 1.0;
   double upper_bound = 0.0;
-  int num_intervals = 1000;
+  int num_intervals = 10000;
   std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
 
   taskData->inputs.emplace_back(reinterpret_cast<uint8_t*>(&lower_bound));

@@ -53,7 +53,6 @@ bool lupsha_e_rect_integration_mpi::TestMPITaskSequential::run() {
   internal_order_test();
 
   double width = (upper_bound - lower_bound) / num_intervals;
-  input_.resize(num_intervals);
   double sum = 0.0;
 
   for (int i = 0; i < num_intervals; ++i) {
