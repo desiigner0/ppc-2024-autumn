@@ -61,3 +61,47 @@ TEST(lupsha_e_rect_integration_seq, Test_Rect2) {
 
   EXPECT_NEAR(result[0], expected_result, 0.01);
 }
+
+TEST(lupsha_e_rect_integration_seq, Validation_NotEnoughInputs_Empty) {
+  std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
+  lupsha_e_rect_integration_seq::TestTaskSequential task(taskData);
+
+  ASSERT_FALSE(task.validation());
+}
+
+TEST(lupsha_e_rect_integration_seq, Validation_NotEnoughInputs_OneInput) {
+  std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
+  lupsha_e_rect_integration_seq::TestTaskSequential task(taskData);
+
+  double lower_bound = 0.0;
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t *>(&lower_bound));
+
+  ASSERT_FALSE(task.validation());
+}
+
+TEST(lupsha_e_rect_integration_seq, Validation_FunctionNotSet) {
+  std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
+  lupsha_e_rect_integration_seq::TestTaskSequential task(taskData);
+
+  double lower_bound = 0.0;
+  double upper_bound = 1.0;
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t *>(&lower_bound));
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t *>(&upper_bound));
+
+  ASSERT_FALSE(task.validation());
+}
+
+TEST(lupsha_e_rect_integration_seq, Validation_AllInputsCorrect) {
+  std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
+  lupsha_e_rect_integration_seq::TestTaskSequential task(taskData);
+
+  double lower_bound = 0.0;
+  double upper_bound = 1.0;
+  int num_intervals = 1000;
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t *>(&lower_bound));
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t *>(&upper_bound));
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t *>(&num_intervals));
+  task.function_set([](double x) { return x; });
+
+  ASSERT_TRUE(task.validation());
+}

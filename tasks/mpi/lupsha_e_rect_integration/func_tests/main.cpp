@@ -16,7 +16,7 @@ TEST(lupsha_e_rect_integration_mpi, Test_Constant) {
   boost::mpi::communicator world;
   double lower_bound = 0.0;
   double upper_bound = 1.0;
-  int num_intervals = 1000;
+  int num_intervals = 897;
   std::vector<double> global_sum(1, 0.0);
   std::vector<double> result_seq(1, 0.0);
 
@@ -265,4 +265,62 @@ TEST(lupsha_e_rect_integration_mpi, Test_Power) {
 
     ASSERT_NEAR(global_sum[0], result_seq[0], 1e-3);
   }
+}
+
+TEST(lupsha_e_rect_integration_mpi, Validation_NotEnoughInputs) {
+  boost::mpi::communicator world;
+  std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
+
+  lupsha_e_rect_integration_mpi::TestMPITaskParallel task(taskData);
+  ASSERT_FALSE(task.validation());
+
+  lupsha_e_rect_integration_mpi::TestMPITaskSequential sequential_task(taskData);
+  ASSERT_FALSE(sequential_task.validation());
+}
+
+TEST(lupsha_e_rect_integration_mpi, Validation_LowerBoundGreaterThanUpperBound) {
+  boost::mpi::communicator world;
+  double lower_bound = 1.0;
+  double upper_bound = 0.0;
+  int num_intervals = 1000;
+  std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
+
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t*>(&lower_bound));
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t*>(&upper_bound));
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t*>(&num_intervals));
+
+  lupsha_e_rect_integration_mpi::TestMPITaskParallel task(taskData);
+  ASSERT_FALSE(task.validation());
+
+  lupsha_e_rect_integration_mpi::TestMPITaskSequential sequential_task(taskData);
+  ASSERT_FALSE(sequential_task.validation());
+}
+
+TEST(lupsha_e_rect_integration_mpi, Validation_NumIntervalsZeroOrNegative) {
+  boost::mpi::communicator world;
+  double lower_bound = 0.0;
+  double upper_bound = 1.0;
+  int num_intervals = 0;
+  std::shared_ptr<ppc::core::TaskData> taskData = std::make_shared<ppc::core::TaskData>();
+
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t*>(&lower_bound));
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t*>(&upper_bound));
+  taskData->inputs.emplace_back(reinterpret_cast<uint8_t*>(&num_intervals));
+
+  lupsha_e_rect_integration_mpi::TestMPITaskParallel task(taskData);
+  ASSERT_FALSE(task.validation());
+
+  lupsha_e_rect_integration_mpi::TestMPITaskSequential sequential_task(taskData);
+  ASSERT_FALSE(sequential_task.validation());
+}
+
+int main(int argc, char** argv) {
+  boost::mpi::environment env(argc, argv);
+  boost::mpi::communicator world;
+  ::testing::InitGoogleTest(&argc, argv);
+  ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
+  if (world.rank() != 0) {
+    delete listeners.Release(listeners.default_result_printer());
+  }
+  return RUN_ALL_TESTS();
 }

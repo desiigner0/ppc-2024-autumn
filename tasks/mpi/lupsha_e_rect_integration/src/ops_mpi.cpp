@@ -37,13 +37,16 @@ bool lupsha_e_rect_integration_mpi::TestMPITaskSequential::validation() {
 
   if (taskData->inputs.size() < 3) {
     return false;
-    std::cout << "Validation failed: not enough input data." << std::endl;
   }
 
   double validation_lower_bound = *reinterpret_cast<double*>(taskData->inputs[0]);
   double validation_upper_bound = *reinterpret_cast<double*>(taskData->inputs[1]);
   if (validation_lower_bound >= validation_upper_bound) {
-    std::cout << "Validation failed: lower_bound >= upper_bound." << std::endl;
+    return false;
+  }
+
+  int validation_num_intervals = *reinterpret_cast<int*>(taskData->inputs[2]);
+  if (validation_num_intervals <= 0) {
     return false;
   }
 
@@ -124,20 +127,17 @@ bool lupsha_e_rect_integration_mpi::TestMPITaskParallel::validation() {
   internal_order_test();
   if (world.rank() == 0) {
     if (taskData->inputs.size() < 3) {
-      std::cout << "Validation failed: not enough input data." << std::endl;
       return false;
     }
 
     double validation_lower_bound = *reinterpret_cast<double*>(taskData->inputs[0]);
     double validation_upper_bound = *reinterpret_cast<double*>(taskData->inputs[1]);
     if (validation_lower_bound >= validation_upper_bound) {
-      std::cout << "Validation failed: lower_bound >= upper_bound." << std::endl;
       return false;
     }
 
     int validation_num_intervals = *reinterpret_cast<int*>(taskData->inputs[2]);
     if (validation_num_intervals <= 0) {
-      std::cout << "Validation failed: num_intervals <= 0." << std::endl;
       return false;
     }
   }
