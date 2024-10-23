@@ -313,14 +313,3 @@ TEST(lupsha_e_rect_integration_mpi, Validation_NumIntervalsZeroOrNegative) {
   lupsha_e_rect_integration_mpi::TestMPITaskSequential sequential_task(taskData);
   ASSERT_FALSE(sequential_task.validation());
 }
-
-int main(int argc, char** argv) {
-  boost::mpi::environment env(argc, argv);
-  boost::mpi::communicator world;
-  ::testing::InitGoogleTest(&argc, argv);
-  ::testing::TestEventListeners& listeners = ::testing::UnitTest::GetInstance()->listeners();
-  if (world.rank() != 0) {
-    delete listeners.Release(listeners.default_result_printer());
-  }
-  return RUN_ALL_TESTS();
-}

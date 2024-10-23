@@ -46,11 +46,7 @@ bool lupsha_e_rect_integration_mpi::TestMPITaskSequential::validation() {
   }
 
   int validation_num_intervals = *reinterpret_cast<int*>(taskData->inputs[2]);
-  if (validation_num_intervals <= 0) {
-    return false;
-  }
-
-  return true;
+  return validation_num_intervals > 0;
 }
 
 bool lupsha_e_rect_integration_mpi::TestMPITaskSequential::run() {
